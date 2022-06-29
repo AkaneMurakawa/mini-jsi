@@ -4,6 +4,7 @@ import jsi.common.Atom;
 import jsi.exception.SyntaxError;
 import jsi.lexical.LiteralType;
 import jsi.lexical.Symbols;
+import jsi.lexical.Terminator;
 import jsi.lexical.Token;
 
 import java.util.ArrayList;
@@ -77,16 +78,62 @@ public class Parser {
         return false;
     }
 
+    private boolean isLeftParen(){
+        return Atom.is(LiteralType.TERMINATOR, token().getLiteralType()) && Terminator.K_LEFT_PAREN.is(token().getLiteral());
+    }
+
+    private boolean isRightParen(){
+        return Atom.is(LiteralType.TERMINATOR, token().getLiteralType()) && Terminator.K_RIGHT_PAREN.is(token().getLiteral());
+    }
+
     /**
      * +-操作
      * @return
      */
     private Expr plusOrMinus(){
+        if (isLeftParen()){
+            return paren();
+        }
+
         // times or divide or percent priority to eval
         Expr expression = priority();
         while (matchSymbols(Symbols.K_PLUS, Symbols.K_MINUS)){
             Token operator = previous();
+            Expr right;
+            if (isLeftParen()){
+                right = paren();
+            }else{
+                right = priority();
+            }
+            expression = new Binary(expression, operator, right);
+        }
+        return expression;
+    }
+
+    /**
+     * ()操作
+     * @return
+     */
+    private Expr paren(){
+        // ( next
+        current++;
+        Expr expression = null;
+        while(!isRightParen()){
+            expression = plusOrMinus();
+        }
+        if (!isRightParen() || expression == null){
+            throw new SyntaxError(String.format("missing right paren ')' at %s", token().getLiteral()));
+        }
+        // ) next
+        current++;
+        while (matchSymbols(Symbols.K_PLUS, Symbols.K_MINUS)){
+            Token operator = previous();
             Expr right = priority();
+            expression = new Binary(expression, operator, right);
+        }
+        while (matchSymbols(Symbols.K_TIMES, Symbols.K_DIVIDE, Symbols.K_PERCENT)){
+            Token operator = previous();
+            Expr right = literal();
             expression = new Binary(expression, operator, right);
         }
         return expression;
@@ -97,10 +144,18 @@ public class Parser {
      * @return
      */
     private Expr priority(){
+        if (isLeftParen()){
+            return paren();
+        }
         Expr expression = literal();
         while (matchSymbols(Symbols.K_TIMES, Symbols.K_DIVIDE, Symbols.K_PERCENT)){
             Token operator = previous();
-            Expr right = literal();
+            Expr right;
+            if (isLeftParen()){
+                right = paren();
+            }else{
+                right = literal();
+            }
             expression = new Binary(expression, operator, right);
         }
         return expression;
@@ -114,9 +169,6 @@ public class Parser {
     public List<Expr> parse() throws SyntaxError {
         List<Expr> ast = new ArrayList<>();
         while(!isEnd()){
-            if (!Atom.is(LiteralType.NUMBER, token().getLiteralType())){
-                throw new SyntaxError(String.format("operating parameters must be numeric, symbol %s", token().getLiteral()));
-            }
             ast.add(plusOrMinus());
         }
         return ast;
