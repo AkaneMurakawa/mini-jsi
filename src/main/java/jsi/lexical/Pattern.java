@@ -1,4 +1,4 @@
-package jsi.ast;
+package jsi.lexical;
 
 /**
  * 正则表达式

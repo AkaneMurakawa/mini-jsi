@@ -1,4 +1,4 @@
-package jsi.ast;
+package jsi.lexical;
 
 /**
  * 终止符
@@ -25,7 +25,7 @@ public enum Terminator implements Element{
     public static boolean contains(String keyword){
         Terminator[] values = values();
         for (Terminator value : values) {
-            if (value.getKeyword().equals(keyword)){
+            if (value.is(keyword)){
                 return true;
             }
         }

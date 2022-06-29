@@ -1,4 +1,4 @@
-package jsi.ast;
+package jsi.lexical;
 
 /**
  * 运算符号
@@ -34,7 +34,7 @@ public enum Symbols implements Element{
     public static Symbols get(String keyword){
         Symbols[] values = values();
         for (Symbols value : values) {
-            if (value.getKeyword().equals(keyword)){
+            if (value.is(keyword)){
                 return value;
             }
         }
@@ -44,7 +44,7 @@ public enum Symbols implements Element{
     public static boolean contains(String keyword){
         Symbols[] values = values();
         for (Symbols value : values) {
-            if (value.getKeyword().equals(keyword)){
+            if (value.is(keyword)){
                 return true;
             }
         }

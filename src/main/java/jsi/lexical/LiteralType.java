@@ -1,11 +1,11 @@
-package jsi.ast;
+package jsi.lexical;
 
 /**
  * 词法类型
  * @author AkaneMurakawa
  * @date 2022-06-27
  */
-public interface LexicalType {
+public interface LiteralType {
 
     String SYMBOLS = "symbols";
 
