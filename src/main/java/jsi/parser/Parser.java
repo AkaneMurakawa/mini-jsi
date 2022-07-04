@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 语法分析
+ * 语法分析，构建语法解析树
  * @author AkaneMurakawa
  * @date 2022-06-28
  */
@@ -91,7 +91,7 @@ public class Parser {
      * @return
      */
     private Expr plusOrMinus(){
-        if (isLeftParen()){
+        if (isLeftParen()) {
             return paren();
         }
 
@@ -126,21 +126,11 @@ public class Parser {
         }
         // ) next
         current++;
-        while (matchSymbols(Symbols.K_PLUS, Symbols.K_MINUS)){
-            Token operator = previous();
-            Expr right = priority();
-            expression = new Binary(expression, operator, right);
-        }
-        while (matchSymbols(Symbols.K_TIMES, Symbols.K_DIVIDE, Symbols.K_PERCENT)){
-            Token operator = previous();
-            Expr right = literal();
-            expression = new Binary(expression, operator, right);
-        }
         return expression;
     }
 
     /**
-     * *\/操作
+     * *\/%操作
      * @return
      */
     private Expr priority(){
@@ -169,7 +159,18 @@ public class Parser {
     public List<Expr> parse() throws SyntaxError {
         List<Expr> ast = new ArrayList<>();
         while(!isEnd()){
-            ast.add(plusOrMinus());
+            Expr expression = plusOrMinus();
+            while (matchSymbols(Symbols.K_PLUS, Symbols.K_MINUS)){
+                Token operator = previous();
+                Expr right = priority();
+                expression = new Binary(expression, operator, right);
+            }
+            while (matchSymbols(Symbols.K_TIMES, Symbols.K_DIVIDE, Symbols.K_PERCENT)){
+                Token operator = previous();
+                Expr right = literal();
+                expression = new Binary(expression, operator, right);
+            }
+            ast.add(expression);
         }
         return ast;
     }

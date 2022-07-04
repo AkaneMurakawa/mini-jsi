@@ -38,7 +38,7 @@ public class Binary implements Expr{
     public String toString() {
         return "Binary{" +
                 "left=" + left +
-                ", operator=" + operator +
+                ", operator=" + operator.getLiteral() +
                 ", right=" + right +
                 '}';
     }

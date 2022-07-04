@@ -40,7 +40,6 @@ public class Repl {
             System.out.print(PROMPT);
             BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
             String line = reader.readLine();
-
             try{
                 System.out.println(line);
                 List<Token> tokens = Lexical.tokenizer(line);

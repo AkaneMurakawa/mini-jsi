@@ -20,8 +20,6 @@ public class Literal implements Expr{
 
     @Override
     public String toString() {
-        return "Literal{" +
-                "value=" + value +
-                '}';
+        return value.toString();
     }
 }

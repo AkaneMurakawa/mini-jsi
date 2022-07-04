@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 词法分析
+ * 词法分析，解析成Token
  * @author AkaneMurakawa
  * @date 2022-06-28
  */
