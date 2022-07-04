@@ -160,6 +160,7 @@ public class Parser {
         List<Expr> ast = new ArrayList<>();
         while(!isEnd()){
             Expr expression = plusOrMinus();
+            // ()操作处理，标记为left
             while (matchSymbols(Symbols.K_PLUS, Symbols.K_MINUS)){
                 Token operator = previous();
                 Expr right = priority();
