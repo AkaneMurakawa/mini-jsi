@@ -9,31 +9,31 @@ package jsi.lexical;
 public class Token {
 
     /**
-     * 标识符类型
+     * 标识符种类
      */
-    private String literalType;
+    private String tokenKind;
     /**
      * 标识符值
      */
     private String literal;
 
-    public String getLiteralType() {
-        return literalType;
+    public String getTokenKind() {
+        return tokenKind;
     }
 
     public String getLiteral() {
         return literal;
     }
 
-    public Token(String literalType, String literal) {
-        this.literalType = literalType;
+    public Token(String tokenKind, String literal) {
+        this.tokenKind = tokenKind;
         this.literal = literal;
     }
 
     @Override
     public String toString() {
         return "Token{" +
-                "literalType='" + literalType + '\'' +
+                "tokenKind='" + tokenKind + '\'' +
                 ", literal='" + literal + '\'' +
                 '}';
     }

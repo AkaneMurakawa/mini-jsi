@@ -2,10 +2,10 @@ package jsi.parser;
 
 import jsi.common.Atom;
 import jsi.exception.SyntaxError;
-import jsi.lexical.LiteralType;
 import jsi.lexical.Symbols;
 import jsi.lexical.Terminator;
 import jsi.lexical.Token;
+import jsi.lexical.TokenKind;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,8 +49,8 @@ public class Parser {
         return tokens.get(current - 1);
     }
 
-    private Expr literal(){
-        if(Atom.is(LiteralType.NUMBER, token().getLiteralType())){
+    private Expr parsePrimaryExpression(){
+        if(Atom.is(TokenKind.NUMBER, token().getTokenKind())){
             // next
             current++;
             return new Literal(previous().getLiteral());
@@ -79,31 +79,31 @@ public class Parser {
     }
 
     private boolean isLeftParen(){
-        return Atom.is(LiteralType.TERMINATOR, token().getLiteralType()) && Terminator.K_LEFT_PAREN.is(token().getLiteral());
+        return Atom.is(TokenKind.TERMINATOR, token().getTokenKind()) && Terminator.K_LEFT_PAREN.is(token().getLiteral());
     }
 
     private boolean isRightParen(){
-        return Atom.is(LiteralType.TERMINATOR, token().getLiteralType()) && Terminator.K_RIGHT_PAREN.is(token().getLiteral());
+        return Atom.is(TokenKind.TERMINATOR, token().getTokenKind()) && Terminator.K_RIGHT_PAREN.is(token().getLiteral());
     }
 
     /**
      * +-操作
      * @return
      */
-    private Expr plusOrMinus(){
+    private Expr parseExpression(){
         if (isLeftParen()) {
-            return paren();
+            return parseParentheses();
         }
 
         // times or divide or percent priority to eval
-        Expr expression = priority();
+        Expr expression = parseTerm();
         while (matchSymbols(Symbols.K_PLUS, Symbols.K_MINUS)){
             Token operator = previous();
             Expr right;
             if (isLeftParen()){
-                right = paren();
+                right = parseParentheses();
             }else{
-                right = priority();
+                right = parseTerm();
             }
             expression = new Binary(expression, operator, right);
         }
@@ -114,12 +114,12 @@ public class Parser {
      * ()操作
      * @return
      */
-    private Expr paren(){
+    private Expr parseParentheses(){
         // ( next
         current++;
         Expr expression = null;
         while(!isRightParen()){
-            expression = plusOrMinus();
+            expression = parseExpression();
         }
         if (!isRightParen() || expression == null){
             throw new SyntaxError(String.format("missing right paren ')' at %s", token().getLiteral()));
@@ -133,18 +133,18 @@ public class Parser {
      * *\/%操作
      * @return
      */
-    private Expr priority(){
+    private Expr parseTerm(){
         if (isLeftParen()){
-            return paren();
+            return parseParentheses();
         }
-        Expr expression = literal();
+        Expr expression = parsePrimaryExpression();
         while (matchSymbols(Symbols.K_TIMES, Symbols.K_DIVIDE, Symbols.K_PERCENT)){
             Token operator = previous();
             Expr right;
             if (isLeftParen()){
-                right = paren();
+                right = parseParentheses();
             }else{
-                right = literal();
+                right = parsePrimaryExpression();
             }
             expression = new Binary(expression, operator, right);
         }
@@ -153,22 +153,34 @@ public class Parser {
 
     /**
      * 语法分析
+     * expression
+     *     : term
+     *     | expression ADD term
+     *     | expression SUB term
+     *
+     * term
+     *     : primary_expression
+     *     | term MUL primary_expresion
+     *     | term DIV primary_expresion
+     *
+     * primary_expression
+     *     :literal
      * @return
      * @throws SyntaxError
      */
     public List<Expr> parse() throws SyntaxError {
         List<Expr> ast = new ArrayList<>();
         while(!isEnd()){
-            Expr expression = plusOrMinus();
+            Expr expression = parseExpression();
             // ()操作处理，标记为left
             while (matchSymbols(Symbols.K_PLUS, Symbols.K_MINUS)){
                 Token operator = previous();
-                Expr right = priority();
+                Expr right = parseTerm();
                 expression = new Binary(expression, operator, right);
             }
             while (matchSymbols(Symbols.K_TIMES, Symbols.K_DIVIDE, Symbols.K_PERCENT)){
                 Token operator = previous();
-                Expr right = literal();
+                Expr right = parsePrimaryExpression();
                 expression = new Binary(expression, operator, right);
             }
             ast.add(expression);

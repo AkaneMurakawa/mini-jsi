@@ -31,13 +31,13 @@ public class Lexical {
             String strs;
             // 多字符串操作符
             if (hasNext && Symbols.contains((strs = str.concat(String.valueOf(chars[i+1]))))){
-                tokens.add(new Token(LiteralType.SYMBOLS, strs));
+                tokens.add(new Token(TokenKind.SYMBOLS, strs));
                 i++;i++;
                 continue;
             }
             // 终止符
             if (Terminator.contains(str)){
-                tokens.add(new Token(LiteralType.TERMINATOR, str));
+                tokens.add(new Token(TokenKind.TERMINATOR, str));
                 i++;
                 continue;
             }
@@ -56,7 +56,7 @@ public class Lexical {
                 if (!value.matches(Pattern.NUMBER)){
                     throw new ParserException(String.format("illegal number %s", value));
                 }
-                tokens.add(new Token(LiteralType.NUMBER, value));
+                tokens.add(new Token(TokenKind.NUMBER, value));
                 continue;
             }
 
@@ -74,14 +74,14 @@ public class Lexical {
                 if (!value.matches(Pattern.NUMBER)){
                     throw new ParserException(String.format("illegal number %s", value));
                 }
-                tokens.add(new Token(LiteralType.NUMBER, value));
+                tokens.add(new Token(TokenKind.NUMBER, value));
                 i++;
                 continue;
             }
 
             // 单字符操作符
             if (Symbols.contains(str)){
-                tokens.add(new Token(LiteralType.SYMBOLS, str));
+                tokens.add(new Token(TokenKind.SYMBOLS, str));
                 i++;
                 continue;
             }
@@ -93,7 +93,7 @@ public class Lexical {
                     value += str;
                     i++;
                 }
-                tokens.add(new Token(LiteralType.VARIABLE, value));
+                tokens.add(new Token(TokenKind.VARIABLE, value));
                 continue;
             }
 
